@@ -13,8 +13,8 @@ class TranslationController {
     lateinit var repo: TranslationRepository
 
     @GetMapping("/translations/all")
-    fun getAllTranslationsForProject(@RequestParam projectId: String, @RequestParam locale: Locale): ResponseEntity<ProjectTranslation> {
-        return ResponseEntity(this.repo.getByProjectIdAndLocale(projectId, locale), HttpStatus.OK)
+    fun getAllTranslationsForProject(@RequestParam projectId: String): ResponseEntity<List<ProjectTranslation>> {
+        return ResponseEntity(this.repo.getByProjectId(projectId), HttpStatus.OK)
     }
 
     @GetMapping("/translations/get")

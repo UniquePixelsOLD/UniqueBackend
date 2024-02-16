@@ -6,5 +6,6 @@ import java.util.Locale
 interface TranslationRepository : MongoRepository<ProjectTranslation, String> {
 
     fun getByProjectIdAndLocale(projectId: String, locale: Locale): ProjectTranslation
+    fun getByProjectId(projectId: String): List<ProjectTranslation>
 
 }

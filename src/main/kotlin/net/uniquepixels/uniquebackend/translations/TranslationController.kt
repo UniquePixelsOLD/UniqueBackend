@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.util.Locale
 
 @RestController
 class TranslationController {
@@ -12,16 +13,17 @@ class TranslationController {
     lateinit var repo: TranslationRepository
 
     @GetMapping("/translations/all")
-    fun getAllTranslationsForProject(@RequestParam projectId: String): ResponseEntity<ProjectTranslation> {
-        return ResponseEntity(this.repo.getByProjectId(projectId), HttpStatus.OK)
+    fun getAllTranslationsForProject(@RequestParam projectId: String, @RequestParam locale: Locale): ResponseEntity<ProjectTranslation> {
+        return ResponseEntity(this.repo.getByProjectIdAndLocale(projectId, locale), HttpStatus.OK)
     }
 
     @GetMapping("/translations/get")
     fun getTranslationForProject(
         @RequestParam projectId: String,
-        @RequestParam translationKey: String
+        @RequestParam translationKey: String,
+        @RequestParam locale: Locale
     ): ResponseEntity<String> {
-        return ResponseEntity(this.repo.getByProjectId(projectId).fileContent[translationKey], HttpStatus.OK)
+        return ResponseEntity(this.repo.getByProjectIdAndLocale(projectId, locale).fileContent[translationKey], HttpStatus.OK)
     }
 
     @PostMapping("/translations/update")

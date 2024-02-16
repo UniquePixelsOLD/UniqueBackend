@@ -1,9 +1,10 @@
 package net.uniquepixels.uniquebackend.translations
 
 import org.springframework.data.mongodb.repository.MongoRepository
+import java.util.Locale
 
 interface TranslationRepository : MongoRepository<ProjectTranslation, String> {
 
-    fun getByProjectId(projectId: String): ProjectTranslation
+    fun getByProjectIdAndLocale(projectId: String, locale: Locale): ProjectTranslation
 
 }

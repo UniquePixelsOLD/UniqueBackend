@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    restart: always
+    env_file:
+      - app.env
+    networks:
+      - uniquebackend_default
+    expose:
+      - 8080:8080
+    depends_on:
+      - mongo
+    links:
+      - mongo
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - up-backend-data:/data/db
+    expose:
+      - 27017:27017
+    env_file:
+      - database.env
+volumes:
+  up-backend-data:
+networks:
+  uniquebackend_default:

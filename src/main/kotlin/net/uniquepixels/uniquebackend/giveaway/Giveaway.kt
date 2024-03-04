@@ -10,7 +10,7 @@ data class Giveaway(
     val price: String,
     val maxWinners: Int,
     var started: Long,
-    val ending: Long,
+    val duration: Long,
     var active: Boolean,
     val enteredMembers: ArrayList<Long>
 )

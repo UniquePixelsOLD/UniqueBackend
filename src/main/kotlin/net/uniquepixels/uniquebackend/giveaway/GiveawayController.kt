@@ -33,6 +33,7 @@ class GiveawayController {
             return ResponseEntity(false, HttpStatus.OK)
 
         giveaway.enteredMembers.add(member)
+        repository.delete(giveaway)
         repository.save(giveaway)
 
         return ResponseEntity(true, HttpStatus.OK)
@@ -47,6 +48,7 @@ class GiveawayController {
             return ResponseEntity(false, HttpStatus.OK)
 
         giveaway.enteredMembers.remove(member)
+        repository.delete(giveaway)
         repository.save(giveaway)
 
         return ResponseEntity(true, HttpStatus.OK)
@@ -58,6 +60,12 @@ class GiveawayController {
         giveaway.giveawayId = repository.count() + 1
         repository.save(giveaway)
         return ResponseEntity(giveaway, HttpStatus.ACCEPTED)
+    }
+
+    @DeleteMapping("/giveaway/delete/{id}")
+    fun deleteGiveaway(@PathVariable id: Long): ResponseEntity<Boolean> {
+        repository.deleteById(id)
+        return ResponseEntity(!repository.existsById(id), HttpStatus.ACCEPTED)
     }
 
 }

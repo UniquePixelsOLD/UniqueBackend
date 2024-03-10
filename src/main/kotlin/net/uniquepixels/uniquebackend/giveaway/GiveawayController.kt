@@ -59,13 +59,29 @@ class GiveawayController {
         giveaway.started = System.currentTimeMillis()
         giveaway.giveawayId = repository.count() + 1
         repository.save(giveaway)
-        return ResponseEntity(giveaway, HttpStatus.ACCEPTED)
+        return ResponseEntity(giveaway, HttpStatus.CREATED)
     }
 
     @DeleteMapping("/giveaway/delete/{id}")
     fun deleteGiveaway(@PathVariable id: Long): ResponseEntity<Boolean> {
         repository.deleteById(id)
         return ResponseEntity(!repository.existsById(id), HttpStatus.ACCEPTED)
+    }
+
+    @PutMapping("/giveaway/publish")
+    fun publishGiveaway(@RequestBody id: Long): ResponseEntity<Giveaway> {
+        val giveaway = repository.getByGiveawayId(id) ?: return ResponseEntity(null, HttpStatus.NOT_FOUND)
+
+        if (giveaway.active) {
+            return ResponseEntity(giveaway, HttpStatus.CONFLICT)
+        }
+
+        giveaway.active = true
+
+        this.repository.deleteById(id)
+        this.repository.save(giveaway)
+
+        return ResponseEntity(giveaway, HttpStatus.ACCEPTED)
     }
 
 }

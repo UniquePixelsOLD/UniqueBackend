@@ -16,8 +16,6 @@ fun main(args: Array<String>) {
 //@Bean
 //fun filterChain(http: HttpSecurity): SecurityFilterChain {
 //
-//
-//
 //    return http
 //        .httpBasic {
 //            it.disable()

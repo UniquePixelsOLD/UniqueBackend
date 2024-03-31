@@ -1,5 +1,7 @@
 package net.uniquepixels.uniquebackend.security
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
@@ -12,12 +14,13 @@ class WebConfig : WebMvcConfigurer {
         registry.addInterceptor(AuthInterceptor()).addPathPatterns("/**")
     }
 
-    override fun addCorsMappings(registry: CorsRegistry) {
-
-        registry.addMapping("/**")
-            .allowedOrigins("http://localhost:5173")
-            .allowedMethods("*")
-            .allowedHeaders("*")
-            .allowCredentials(true)
-    }
+//    override fun addCorsMappings(registry: CorsRegistry) {
+//
+//        LoggerFactory.getLogger(this::class.java).info("Core Mapping loading...")
+//
+//        registry.addMapping("/**")
+//            .allowedMethods("*")
+//            .allowedHeaders("*")
+//            .allowCredentials(true)
+//    }
 }

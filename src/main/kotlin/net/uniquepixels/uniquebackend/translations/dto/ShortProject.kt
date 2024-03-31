@@ -1,3 +1,3 @@
 package net.uniquepixels.uniquebackend.translations.dto
 
-data class ShortProject(val projectId: String, val projectName: String)
+data class ShortProject(val projectId: String, val projectName: String, val projectDescription: String)

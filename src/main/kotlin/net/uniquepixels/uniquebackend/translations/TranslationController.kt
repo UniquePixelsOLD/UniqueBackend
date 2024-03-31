@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/translation/")
+@CrossOrigin(
+    origins = arrayOf("*"),
+    methods = arrayOf(RequestMethod.OPTIONS, RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT)
+)
 class TranslationController {
 
     @Autowired
@@ -19,7 +23,7 @@ class TranslationController {
     @GetMapping("/all")
     fun getProjectIds(): ResponseEntity<Any> {
         return ResponseEntity(
-            this.repo.findAll().stream().map { ShortProject(it.projectId, it.projectName) }.toList(),
+            this.repo.findAll().stream().map { ShortProject(it.projectId, it.projectName, it.projectDescription) }.toList(),
             HttpStatus.OK
         )
     }
@@ -38,13 +42,13 @@ class TranslationController {
     @PostMapping("create")
     fun createProject(@RequestBody dto: CreateProject): ResponseEntity<Any> {
 
-        val projectDto = ProjectDto(ObjectId().toString(), dto.projectName, HashMap())
+        val projectDto = ProjectDto(ObjectId().toString(), dto.projectName, dto.projectDescription, HashMap())
 
         if (this.repo.existsByProjectName(dto.projectName)) {
             return ResponseEntity("Project name already existing!", HttpStatus.CONFLICT)
         }
 
-        return ResponseEntity(this.repo.insert(projectDto), HttpStatus.CREATED)
+        return ResponseEntity(this.repo.insert(projectDto), HttpStatus.OK)
     }
 
 

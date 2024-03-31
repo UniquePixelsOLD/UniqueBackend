@@ -12,5 +12,6 @@ data class Giveaway(
     var started: Long,
     val duration: Long,
     var active: Boolean,
+    var messageId: Long,
     val enteredMembers: ArrayList<Long>
 )

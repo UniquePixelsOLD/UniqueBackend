@@ -3,13 +3,62 @@ package net.uniquepixels.uniquebackend.giveaway
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.messaging.handler.annotation.MessageMapping
+import org.springframework.messaging.handler.annotation.SendTo
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.bind.annotation.*
+import java.time.Instant
+import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @RestController
 class GiveawayController {
 
     @Autowired
     lateinit var repository: GiveawayRepository
+
+    @Autowired
+    lateinit var wsClient: SimpMessagingTemplate
+
+    init {
+        this.endGiveaways()
+    }
+
+    private fun endGiveaways() {
+
+        Executors.newSingleThreadScheduledExecutor().schedule({
+
+            this.repository.getAllByActive(true).forEach {
+
+                val time = it.started + it.duration
+
+                if (time >= Instant.now().epochSecond)
+                    setFinished(it)
+
+            }
+
+        }, 30L, TimeUnit.SECONDS)
+
+    }
+
+    private fun setFinished(giveaway: Giveaway) {
+        giveaway.active = false
+
+        this.repository.deleteById(giveaway.giveawayId)
+        this.repository.save(giveaway)
+
+        val randomMember = giveaway.enteredMembers[Random().nextInt(0, giveaway.enteredMembers.size)]
+
+
+        this.wsClient.convertAndSend("/topic/giveaway/ending", GiveawayFinished(giveaway.messageId, randomMember))
+    }
+
+    @MessageMapping("/giveaway/ending")
+    @SendTo("/response/")
+    fun endingGiveaway(giveawayFinished: GiveawayFinished): GiveawayFinished {
+        return giveawayFinished
+    }
 
     @GetMapping("/giveaway")
     fun getAllActiveGiveaways(): ResponseEntity<List<Giveaway>> {
@@ -56,7 +105,6 @@ class GiveawayController {
 
     @PostMapping("/giveaway/create")
     fun createGiveaway(@RequestBody giveaway: Giveaway): ResponseEntity<Giveaway> {
-        giveaway.started = System.currentTimeMillis()
         giveaway.giveawayId = repository.count() + 1
         repository.save(giveaway)
         return ResponseEntity(giveaway, HttpStatus.CREATED)
@@ -77,6 +125,7 @@ class GiveawayController {
         }
 
         giveaway.active = true
+        giveaway.started = Instant.now().epochSecond
 
         this.repository.deleteById(id)
         this.repository.save(giveaway)

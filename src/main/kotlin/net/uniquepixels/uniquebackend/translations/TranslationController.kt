@@ -1,34 +1,50 @@
 package net.uniquepixels.uniquebackend.translations
 
+import net.uniquepixels.uniquebackend.translations.dto.CreateProject
+import net.uniquepixels.uniquebackend.translations.dto.ProjectDto
+import net.uniquepixels.uniquebackend.translations.dto.ShortProject
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.util.Locale
 
 @RestController
+@RequestMapping("/translation/")
 class TranslationController {
 
     @Autowired
     lateinit var repo: TranslationRepository
 
-    @GetMapping("/translations/all")
-    fun getAllTranslationsForProject(@RequestParam projectId: String): ResponseEntity<List<ProjectTranslation>> {
-        return ResponseEntity(this.repo.getByProjectId(projectId), HttpStatus.OK)
+    @GetMapping("/all")
+    fun getProjectIds(): ResponseEntity<Any> {
+        return ResponseEntity(
+            this.repo.findAll().stream().map { ShortProject(it.projectId, it.projectName) }.toList(),
+            HttpStatus.OK
+        )
     }
 
-    @GetMapping("/translations/get")
-    fun getTranslationForProject(
-        @RequestParam projectId: String,
-        @RequestParam translationKey: String,
-        @RequestParam locale: Locale
-    ): ResponseEntity<String> {
-        return ResponseEntity(this.repo.getByProjectIdAndLocale(projectId, locale).fileContent[translationKey], HttpStatus.OK)
+    @GetMapping("{id}")
+    fun getProject(@PathVariable id: String): ResponseEntity<Any> {
+        val optional = this.repo.findById(id)
+
+        if (!optional.isEmpty) {
+            return ResponseEntity(HttpStatus.NOT_FOUND)
+        }
+
+        return ResponseEntity(optional.get(), HttpStatus.OK)
     }
 
-    @PostMapping("/translations/update")
-    fun updateProjectTranslations(@RequestBody body: ProjectTranslation): ResponseEntity<ProjectTranslation> {
-        return ResponseEntity(this.repo.save(body), HttpStatus.ACCEPTED)
+    @PostMapping("create")
+    fun createProject(@RequestBody dto: CreateProject): ResponseEntity<Any> {
+
+        val projectDto = ProjectDto(ObjectId().toString(), dto.projectName, HashMap())
+
+        if (this.repo.existsByProjectName(dto.projectName)) {
+            return ResponseEntity("Project name already existing!", HttpStatus.CONFLICT)
+        }
+
+        return ResponseEntity(this.repo.insert(projectDto), HttpStatus.CREATED)
     }
 
 

@@ -22,17 +22,22 @@ class TranslationController {
 
     @GetMapping("/all")
     fun getProjectIds(): ResponseEntity<Any> {
+        val findAll = this.repo.findAll()
+
+        if (findAll.isEmpty())
+            return ResponseEntity(HttpStatus.NOT_FOUND)
+
         return ResponseEntity(
-            this.repo.findAll().stream().map { ShortProject(it.projectId, it.projectName, it.projectDescription) }.toList(),
+            findAll.stream().map { ShortProject(it.projectId, it.projectName, it.projectDescription) }.toList(),
             HttpStatus.OK
         )
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     fun getProject(@PathVariable id: String): ResponseEntity<Any> {
         val optional = this.repo.findById(id)
 
-        if (!optional.isEmpty) {
+        if (optional.isEmpty) {
             return ResponseEntity(HttpStatus.NOT_FOUND)
         }
 
@@ -42,7 +47,11 @@ class TranslationController {
     @PostMapping("create")
     fun createProject(@RequestBody dto: CreateProject): ResponseEntity<Any> {
 
-        val projectDto = ProjectDto(ObjectId().toString(), dto.projectName, dto.projectDescription, HashMap())
+        val translations = HashMap<String, java.util.HashMap<String, String>>()
+        translations["test"] = HashMap()
+        translations["test"]?.put("testing", "test")
+
+        val projectDto = ProjectDto(ObjectId().toString(), dto.projectName, dto.projectDescription, translations)
 
         if (this.repo.existsByProjectName(dto.projectName)) {
             return ResponseEntity("Project name already existing!", HttpStatus.CONFLICT)
